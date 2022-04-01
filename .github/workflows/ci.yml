@@ -1,4 +1,4 @@
-name: Falcon
+name: CI
 on:
   push:
     branches:
@@ -20,29 +20,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Workspace
         uses: ./.github/actions/setup-node-workspace
-  build:
-    needs: setup_workspace
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # These permissions are needed to interact with GitHub's OIDC Token endpoint
-    # and update commit status
-    permissions:
-      id-token: write
-      contents: read
-      statuses: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Workspace (From Cache)
-        uses: ./.github/actions/setup-node-workspace
-      - name: Build
-        run: npm run build --if-present
-      - name: Persist Build Assets Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifact
-          path: build
-          retention-days: 1
   extract_git_info:
     needs: setup_workspace
     runs-on: ubuntu-latest
@@ -63,10 +40,9 @@ jobs:
           echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
           echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
   deploy_dev:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/develop'
     needs:
       - extract_git_info
-      - build
     environment:
       name: Development
       url: "https://${{ needs.extract_git_info.outputs.short_sha }}.preview.michaelcclayton.com"
@@ -86,7 +62,7 @@ jobs:
   deploy_production:
     if: github.ref == 'refs/heads/main'
     needs:
-      - build
+      - extract_git_info
     environment:
       name: Production
       url: 'https://michaelcclayton.com?environment=production'
