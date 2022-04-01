@@ -49,13 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Download Build Assets Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifact
-          path: build/
       - name: Mock Deploy
         shell: bash
         run: echo "Mock deploy to development complete!"
@@ -69,13 +62,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Download Build Assets Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifact
-          path: build/
       - name: Mock Deploy
         shell: bash
         run: echo "Mock deploy to production complete!"
