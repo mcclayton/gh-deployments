@@ -63,7 +63,7 @@ jobs:
           echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
           echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
   deploy_dev:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main'
     needs:
       - extract_git_info
       - build
@@ -84,7 +84,7 @@ jobs:
         shell: bash
         run: echo "Mock deploy to development complete!"
   deploy_production:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main'
     needs:
       - build
     environment:
