@@ -1,0 +1,39 @@
+name: Deploy
+description: 'Deploy Various Environments'
+runs-on: ubuntu-latest
+timeout-minutes: 15
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Download Build Assets Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifact
+        path: build/
+    - name: Extract Git Info
+      id: git_info
+      shell: bash
+      run: |
+        if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+          SHA=$GITHUB_SHA
+        elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+          SHA=${{ github.event.pull_request.head.sha }}
+        fi
+        echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
+        echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
+    - name: Add Deployment Version File To Assets
+      shell: bash
+      working-directory: build
+      run: echo "${{ steps.git_info.outputs.short_sha }}" > deployment.txt
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #     role-to-assume: ${{ steps.deployment_info.outputs.iam-role }}
+    #     aws-region: ${{ inputs.bucket-region }}
+    - name: Upload Assets
+      shell: bash
+      run: |
+        echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/builds/${{ steps.git_info.outputs.short_sha }}"
+        echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/active --delete"
