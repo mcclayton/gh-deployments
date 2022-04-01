@@ -28,6 +28,8 @@ jobs:
       full_sha: ${{ steps.git_info.outputs.full_sha }}
       short_sha: ${{ steps.git_info.outputs.short_sha }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Extract Git Info
         id: git_info
         shell: bash
