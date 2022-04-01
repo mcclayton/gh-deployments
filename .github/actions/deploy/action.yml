@@ -2,6 +2,16 @@ name: Deploy
 description: 'Deploy Various Environments'
 runs-on: ubuntu-latest
 timeout-minutes: 15
+inputs:
+  bucket-name:
+    description: 'S3 Bucket For Storing Assets'
+    required: true
+  iam-role:
+    description: 'ARN of IAM Role to Assume'
+    required: true
+  bucket-region:
+    required: false
+    default: 'us-west-2'
 runs:
   using: 'composite'
   steps:
