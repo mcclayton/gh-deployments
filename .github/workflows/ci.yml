@@ -47,6 +47,8 @@ jobs:
       full_sha: ${{ steps.git_info.outputs.full_sha }}
       short_sha: ${{ steps.git_info.outputs.short_sha }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Extract Git Info
         id: git_info
         shell: bash
@@ -59,7 +61,7 @@ jobs:
           echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
           echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
   deploy_dev:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/develop'
     needs:
       - extract_git_info
       - build
@@ -79,22 +81,3 @@ jobs:
       - name: Mock Deploy
         shell: bash
         run: echo "Mock deploy to development complete!"
-  deploy:
-    needs:
-      - extract_git_info
-      - build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment:
-      name: ${{  }}
-      url: "https://${{ needs.extract_git_info.outputs.short_sha }}.preview.michaelcclayton.com"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Download Build Assets Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifact
-          path: build/
-      - name: Deploy
-        uses: ./.github/actions/deploy
