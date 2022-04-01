@@ -80,7 +80,7 @@ jobs:
       - build
     if: ${{ needs.deployment_info.outputs.deployment_env == 'development' ||
           needs.deployment_info.outputs.deployment_env == 'qa' ||
-          needs.deployment_info.outputs.deployment_env }} == 'production' }}
+          needs.deployment_info.outputs.deployment_env == 'production' }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ needs.deployment_info.outputs.deployment_env }}
