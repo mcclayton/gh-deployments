@@ -1,4 +1,4 @@
-name: CI
+name: CI+CD
 on:
   push:
     branches:
@@ -39,13 +39,14 @@ jobs:
           name: build-artifact
           path: build
           retention-days: 1
-  extract_git_info:
+  deployment_info:
     needs: setup_workspace
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       full_sha: ${{ steps.git_info.outputs.full_sha }}
       short_sha: ${{ steps.git_info.outputs.short_sha }}
+      deployment_env: ${{ steps.deployment_info.outputs.env }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,24 +61,35 @@ jobs:
           fi
           echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
           echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
-  deploy_dev:
-    if: github.ref == 'refs/heads/develop'
-    needs:
-      - extract_git_info
-      - build
-    environment:
-      name: preview
-      url: "https://${{ needs.extract_git_info.outputs.short_sha }}.preview.michaelcclayton.com"
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Download Build Assets Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifact
-          path: build/
-      - name: Mock Deploy
+      - name: Extract Deployment Info
+        id: deployment_info
         shell: bash
-        run: echo "Mock deploy to development complete!"
+        run: |
+          if [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/develop' ]; then
+            echo "::set-output name=env::development"
+          elif [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/main' ]; then
+            echo "::set-output name=env::production"
+          elif [[ ${{ github.event_name }} == 'push' && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+            echo "::set-output name=env::qa"
+          else
+            echo "::set-output name=env::preview"
+          fi
+  deploy:
+    needs:
+      - deployment_info
+      - build
+    if: ${{ needs.deployment_info.outputs.deployment_env }} == 'development' || \
+        ${{ needs.deployment_info.outputs.deployment_env }} == 'qa' || \
+        ${{ needs.deployment_info.outputs.deployment_env }} == 'production'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.deployment_info.outputs.deployment_env }}
+      url: "https://michaelcclayton.com?environment=${{ needs.deployment_info.outputs.deployment_env }}"
+    steps:
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          bucket-name: ${{ needs.deployment_info.outputs.deployment_env }}-bucket
+          iam-role: arn:aws:iam::1:role/FakeServiceAccount
+        env:
+          - REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
