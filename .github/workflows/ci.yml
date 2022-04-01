@@ -43,13 +43,33 @@ jobs:
           name: build-artifact
           path: build
           retention-days: 1
+  extract_git_info:
+    needs: setup_workspace
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      full_sha: ${{ steps.git_info.outputs.full_sha }}
+      short_sha: ${{ steps.git_info.outputs.short_sha }}
+    steps:
+      - name: Extract Git Info
+        id: git_info
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            SHA=$GITHUB_SHA
+          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            SHA=${{ github.event.pull_request.head.sha }}
+          fi
+          echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
+          echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
   deploy_dev:
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
+      - extract_git_info
       - build
     environment:
       name: Development
-      url: 'https://michaelcclayton.com?environment=dev'
+      url: "https://${{ needs.extract_git_info.outputs.short_sha }}.preview.michaelcclayton.com"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -64,7 +84,7 @@ jobs:
         shell: bash
         run: echo "Mock deploy to development complete!"
   deploy_production:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
       - build
     environment:
