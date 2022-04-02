@@ -95,6 +95,7 @@ jobs:
           iam-role: arn:aws:iam::1:role/FakeServiceAccount
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
+
   deploy_preview:
     needs:
       - deployment_info
