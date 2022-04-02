@@ -100,7 +100,7 @@ jobs:
     needs:
       - deployment_info
       - build
-    if: ${{ needs.deployment_info.outputs.deployment_env == 'preview' }}
+    if: ${{ needs.deployment_info.outputs.deployment_env }} == 'preview'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
