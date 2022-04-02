@@ -65,6 +65,6 @@ runs:
           -X POST \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/mcclayton/gh-deployments/statuses/${{ steps.git_info.outputs.full_sha }} \
-          -d "{\"state\":\"success\", \"context\": \"deploy_preview\", \"target_url\": \"https://michaelcclayton.com?environment=${{ steps.git_info.outputs.full_sha }}\", \"description\": \"Successful preview deployment\"}"
+          -d "{\"state\":\"success\", \"context\": \"Preview Link\", \"target_url\": \"https://michaelcclayton.com?environment=${{ steps.git_info.outputs.full_sha }}\", \"description\": \"View details for preview link\"}"
 
 
