@@ -78,9 +78,7 @@ jobs:
     needs:
       - deployment_info
       - build
-    if: ${{ needs.deployment_info.outputs.deployment_env == 'development' ||
-          needs.deployment_info.outputs.deployment_env == 'qa' ||
-          needs.deployment_info.outputs.deployment_env == 'production' }}
+    if: ${{ needs.deployment_info.outputs.deployment_env == 'development' || needs.deployment_info.outputs.deployment_env == 'qa' || needs.deployment_info.outputs.deployment_env == 'production' }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ needs.deployment_info.outputs.deployment_env }}
@@ -95,7 +93,6 @@ jobs:
           iam-role: arn:aws:iam::1:role/FakeServiceAccount
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
-
   deploy_preview:
     needs:
       - deployment_info
