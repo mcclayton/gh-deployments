@@ -67,12 +67,16 @@ jobs:
         run: |
           if [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }} ]; then
             echo "::set-output name=env::development"
+            echo "DEVELOPMENT"
           elif [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} ]; then
             echo "::set-output name=env::production"
+            echo "PRODUCTION"
           elif [[ ${{ github.event_name == 'push' }} && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
             echo "::set-output name=env::qa"
+            echo "QA"
           else
             echo "::set-output name=env::preview"
+            echo "PREVIEW"
           fi
   deploy:
     needs:
