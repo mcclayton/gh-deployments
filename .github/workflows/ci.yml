@@ -65,22 +65,26 @@ jobs:
         id: deployment_info
         shell: bash
         run: |
-          if [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }} ]; then
+          if [ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/develop' ]; then
             echo "::set-output name=env::development"
-          elif [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} ]; then
+            echo "DEVELOPMENT"
+            echo "${{ github.event_name }}"
+            echo "${{ github.ref }}"
+          elif [ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/main' }} ]; then
             echo "::set-output name=env::production"
-          elif [[ ${{ github.event_name == 'push' }} && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+            echo "PRODUCTION"
+          elif [[ "${{ github.event_name }}" == 'push' && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
             echo "::set-output name=env::qa"
+            echo "QA"
           else
             echo "::set-output name=env::preview"
+            echo "PREVIEW"
           fi
   deploy:
     needs:
       - deployment_info
       - build
-    if: ${{ needs.deployment_info.outputs.deployment_env == 'development' ||
-          needs.deployment_info.outputs.deployment_env == 'qa' ||
-          needs.deployment_info.outputs.deployment_env == 'production' }}
+    if: ${{ needs.deployment_info.outputs.deployment_env == 'development' || needs.deployment_info.outputs.deployment_env == 'qa' || needs.deployment_info.outputs.deployment_env == 'production' }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ needs.deployment_info.outputs.deployment_env }}
