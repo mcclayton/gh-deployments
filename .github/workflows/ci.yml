@@ -65,11 +65,11 @@ jobs:
         id: deployment_info
         shell: bash
         run: |
-          if [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/develop' ]; then
+          if [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }} ]; then
             echo "::set-output name=env::development"
-          elif [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/main' ]; then
+          elif [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' ]; then
             echo "::set-output name=env::production"
-          elif [[ ${{ github.event_name }} == 'push' && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+          elif [[ ${{ github.event_name == 'push' && github.event.ref =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
             echo "::set-output name=env::qa"
           else
             echo "::set-output name=env::preview"
