@@ -65,11 +65,11 @@ jobs:
         id: deployment_info
         shell: bash
         run: |
-          if [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/develop' ]; then
+          if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/develop' ]]; then
             echo "::set-output name=env::development"
-          elif [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/main' ]; then
+          elif [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/main' ]]; then
             echo "::set-output name=env::production"
-          elif [[ ${{ github.event_name }} == 'push' && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+          elif [[ "${{ github.event_name }}" == 'push' && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
             echo "::set-output name=env::qa"
           else
             echo "::set-output name=env::preview"
@@ -78,18 +78,35 @@ jobs:
     needs:
       - deployment_info
       - build
-    if: ${{ needs.deployment_info.outputs.deployment_env }} == 'development' || \
-        ${{ needs.deployment_info.outputs.deployment_env }} == 'qa' || \
-        ${{ needs.deployment_info.outputs.deployment_env }} == 'production'
+    if: ${{ needs.deployment_info.outputs.deployment_env == 'development' || needs.deployment_info.outputs.deployment_env == 'qa' || needs.deployment_info.outputs.deployment_env == 'production' }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ needs.deployment_info.outputs.deployment_env }}
       url: "https://michaelcclayton.com?environment=${{ needs.deployment_info.outputs.deployment_env }}"
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
           bucket-name: ${{ needs.deployment_info.outputs.deployment_env }}-bucket
           iam-role: arn:aws:iam::1:role/FakeServiceAccount
+        env:
+          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
+  deploy_preview:
+    needs:
+      - deployment_info
+      - build
+    if: ${{ needs.deployment_info.outputs.deployment_env == 'preview' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          bucket-name: ${{ needs.deployment_info.outputs.deployment_env }}-bucket
+          iam-role: arn:aws:iam::1:role/FakeServiceAccount
+          is-preview: true
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
