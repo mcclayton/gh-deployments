@@ -95,3 +95,20 @@ jobs:
           iam-role: arn:aws:iam::1:role/FakeServiceAccount
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
+  deploy_preview:
+    needs:
+      - deployment_info
+      - build
+    if: ${{ needs.deployment_info.outputs.deployment_env == 'preview' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy
+        uses: ./.github/actions/deploy
+        with:
+          bucket-name: ${{ needs.deployment_info.outputs.deployment_env }}-bucket
+          iam-role: arn:aws:iam::1:role/FakeServiceAccount
+          is-preview: true
+        env:
+          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
