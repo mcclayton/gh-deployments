@@ -56,7 +56,7 @@ runs:
           echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/previews/${{ steps.git_info.outputs.short_sha }}"
         fi
     - name: Update Commit Status
-      if: ${{ success() && inputs.is-preview == true }}
+      if: ${{ inputs.is-preview }} == true
       shell: bash
       run: |
         curl \
