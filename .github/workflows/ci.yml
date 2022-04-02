@@ -54,9 +54,9 @@ jobs:
         id: git_info
         shell: bash
         run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+          if [[ "${{ github.event_name }}" == "push" ]]; then
             SHA=$GITHUB_SHA
-          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             SHA=${{ github.event.pull_request.head.sha }}
           fi
           echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
