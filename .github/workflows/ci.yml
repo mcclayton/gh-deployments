@@ -68,6 +68,8 @@ jobs:
           if [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }} ]; then
             echo "::set-output name=env::development"
             echo "DEVELOPMENT"
+            echo "${{ github.event_name }}"
+            echo "${{ github.ref }}"
           elif [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} ]; then
             echo "::set-output name=env::production"
             echo "PRODUCTION"
