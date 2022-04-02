@@ -65,7 +65,7 @@ jobs:
         id: deployment_info
         shell: bash
         run: |
-          if [ ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }} ]; then
+          if [ ${{ github.event_name }} == 'push' && ${{ github.ref }} == 'refs/heads/develop' ]; then
             echo "::set-output name=env::development"
             echo "DEVELOPMENT"
             echo "${{ github.event_name }}"
