@@ -15,6 +15,7 @@ outputs:
     value: ${{ steps.deployment_info.outputs.iam_role }}
   s3_bucket:
     value: ${{ steps.deployment_info.outputs.s3_bucket }}
+runs:
   using: 'composite'
   steps:
     - name: Checkout
