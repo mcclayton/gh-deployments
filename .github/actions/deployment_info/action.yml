@@ -62,4 +62,8 @@ runs:
           echo "::set-output name=url::https://${{ steps.git_info.outputs.short_sha }}.preview.my.cadence.care"
           echo "::set-output name=iam_role::$QA_IAM_ROLE"
           echo "::set-output name=s3_bucket::$QA_BUCKET_NAME"
+
+          echo "TESTING"
+          echo "$QA_IAM_ROLE"
+          echo "$QA_BUCKET_NAME"
         fi
