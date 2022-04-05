@@ -1,0 +1,25 @@
+name: Git Info
+description: Retrieves git SHA information
+runs-on: ubuntu-latest
+timeout-minutes: 15
+outputs:
+  full_sha:
+    value: ${{ steps.git_info.outputs.full_sha }}
+  short_sha:
+    value: ${{ steps.git_info.outputs.short_sha }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Extract Git Info
+      id: git_info
+      shell: bash
+      run: |
+        if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+          SHA=$GITHUB_SHA
+        elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+          SHA=${{ github.event.pull_request.head.sha }}
+        fi
+        echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
+        echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
