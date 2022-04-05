@@ -3,8 +3,10 @@ description: Retrieves git SHA information
 runs-on: ubuntu-latest
 timeout-minutes: 15
 outputs:
-  full_sha: ${{ steps.git_info.outputs.full_sha }}
-  short_sha: ${{ steps.git_info.outputs.short_sha }}
+  full_sha:
+    value: ${{ steps.git_info.outputs.full_sha }}
+  short_sha:
+    value: ${{ steps.git_info.outputs.short_sha }}
 runs:
   using: 'composite'
   steps:
