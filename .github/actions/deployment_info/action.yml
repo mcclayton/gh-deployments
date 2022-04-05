@@ -15,14 +15,6 @@ outputs:
     value: ${{ steps.deployment_info.outputs.iam_role }}
   s3_bucket:
     value: ${{ steps.deployment_info.outputs.s3_bucket }}
-runs:
-  env:
-    PROD_BUCKET_NAME: production-deployment
-    PROD_IAM_ROLE: arn:aws:iam::1:role/FakeProdServiceAccount
-    QA_BUCKET_NAME: qa-deployment
-    QA_IAM_ROLE: arn:aws:iam::1:role/FakeQAServiceAccount
-    DEV_BUCKET_NAME: development-deployment
-    DEV_IAM_ROLE: arn:aws:iam::1:role/FakeDevServiceAccount
   using: 'composite'
   steps:
     - name: Checkout
@@ -63,3 +55,10 @@ runs:
           echo "::set-output name=iam_role::${{ env.QA_IAM_ROLE }}"
           echo "::set-output name=s3_bucket::${{ env.QA_BUCKET_NAME }}"
         fi
+      env:
+        PROD_BUCKET_NAME: production-deployment
+        PROD_IAM_ROLE: arn:aws:iam::1:role/FakeProdServiceAccount
+        QA_BUCKET_NAME: qa-deployment
+        QA_IAM_ROLE: arn:aws:iam::1:role/FakeQAServiceAccount
+        DEV_BUCKET_NAME: development-deployment
+        DEV_IAM_ROLE: arn:aws:iam::1:role/FakeDevServiceAccount
