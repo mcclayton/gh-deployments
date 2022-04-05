@@ -49,6 +49,8 @@ jobs:
       iam_role: ${{ steps.deployment_info.outputs.iam_role }}
       s3_bucket: ${{ steps.deployment_info.outputs.s3_bucket }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Extract Git Info
         id: git_info
         uses: ./.github/actions/git_info
