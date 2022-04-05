@@ -28,15 +28,7 @@ runs:
         path: build/
     - name: Extract Git Info
       id: git_info
-      shell: bash
-      run: |
-        if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
-          SHA=$GITHUB_SHA
-        elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-          SHA=${{ github.event.pull_request.head.sha }}
-        fi
-        echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
-        echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
+      uses: ./.github/actions/git_info
     - name: Add Deployment Version File To Assets
       shell: bash
       working-directory: build
@@ -44,7 +36,7 @@ runs:
     # - name: Configure AWS Credentials
     #   uses: aws-actions/configure-aws-credentials@v1
     #   with:
-    #     role-to-assume: ${{ steps.deployment_info.outputs.iam-role }}
+    #     role-to-assume: ${{ inputs.iam-role }}
     #     aws-region: ${{ inputs.bucket-region }}
     - name: Upload Assets
       shell: bash
@@ -65,6 +57,6 @@ runs:
           -X POST \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/mcclayton/gh-deployments/statuses/${{ steps.git_info.outputs.full_sha }} \
-          -d "{\"state\":\"success\", \"context\": \"Preview Environment\", \"target_url\": \"https://michaelcclayton.com?environment=${{ steps.git_info.outputs.full_sha }}\", \"description\": \"View details for preview environment\"}"
+          -d "{\"state\":\"success\", \"context\": \"Preview Environment\", \"target_url\": \"https://${{ steps.git_info.outputs.short_sha }}.preview.my.cadence.care\", \"description\": \"View details for preview environment\"}"
 
 

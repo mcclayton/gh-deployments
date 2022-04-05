@@ -44,35 +44,38 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
-      full_sha: ${{ steps.git_info.outputs.full_sha }}
-      short_sha: ${{ steps.git_info.outputs.short_sha }}
       deployment_env: ${{ steps.deployment_info.outputs.env }}
+      deployment_url: ${{ steps.deployment_info.outputs.url }}
+      iam_role: ${{ steps.deployment_info.outputs.iam_role }}
+      s3_bucket: ${{ steps.deployment_info.outputs.s3_bucket }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Extract Git Info
         id: git_info
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            SHA=$GITHUB_SHA
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            SHA=${{ github.event.pull_request.head.sha }}
-          fi
-          echo "::set-output name=full_sha::$(git rev-parse "$SHA")"
-          echo "::set-output name=short_sha::$(git rev-parse --short=7 "$SHA")"
+        uses: ./.github/actions/git_info
       - name: Extract Deployment Info
         id: deployment_info
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/develop' ]]; then
             echo "::set-output name=env::development"
+            echo "::set-output name=url::https://dev.cadence.care"
+            echo "::set-output name=iam_role::arn:aws:iam::1:role/FakeDevServiceAccount"
+            echo "::set-output name=s3_bucket::dev-bucket"
           elif [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/main' ]]; then
             echo "::set-output name=env::production"
+            echo "::set-output name=url::https://qa.cadence.care"
+            echo "::set-output name=iam_role::arn:aws:iam::1:role/FakeProdServiceAccount"
+            echo "::set-output name=s3_bucket::prod-bucket"
           elif [[ "${{ github.event_name }}" == 'push' && "${{ github.event.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
             echo "::set-output name=env::qa"
+            echo "::set-output name=url::https://dev.cadence.care"
+            echo "::set-output name=iam_role::arn:aws:iam::1:role/FakeQAServiceAccount"
+            echo "::set-output name=s3_bucket::qa-bucket"
           else
             echo "::set-output name=env::preview"
+            echo "::set-output name=url::https://${{ steps.git_info.outputs.short_sha }}.preview.my.cadence.care"
+            echo "::set-output name=iam_role::arn:aws:iam::1:role/FakeQAServiceAccount"
+            echo "::set-output name=s3_bucket::qa-bucket"
           fi
   deploy:
     needs:
@@ -82,15 +85,15 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ needs.deployment_info.outputs.deployment_env }}
-      url: "https://michaelcclayton.com?environment=${{ needs.deployment_info.outputs.deployment_env }}"
+      url: ${{ needs.deployment_info.outputs.deployment_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
-          bucket-name: ${{ needs.deployment_info.outputs.deployment_env }}-bucket
-          iam-role: arn:aws:iam::1:role/FakeServiceAccount
+          bucket-name: ${{ needs.deployment_info.outputs.s3_bucket }}
+          iam-role: ${{ needs.deployment_info.outputs.iam_role }}
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
   deploy_preview:
@@ -105,8 +108,8 @@ jobs:
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
-          bucket-name: ${{ needs.deployment_info.outputs.deployment_env }}-bucket
-          iam-role: arn:aws:iam::1:role/FakeServiceAccount
+          bucket-name: ${{ needs.deployment_info.outputs.s3_bucket }}
+          iam-role: ${{ needs.deployment_info.outputs.iam_role }}
           is-preview: true
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
