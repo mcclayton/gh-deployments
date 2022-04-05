@@ -21,14 +21,14 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Extract Git Info
+      id: git_info
+      uses: ./.github/actions/git_info
     - name: Download Build Assets Artifact
       uses: actions/download-artifact@v3
       with:
         name: build-artifact
         path: build/
-    - name: Extract Git Info
-      id: git_info
-      uses: ./.github/actions/git_info
     - name: Add Deployment Version File To Assets
       shell: bash
       working-directory: build
