@@ -73,6 +73,7 @@ jobs:
           iam-role: ${{ needs.deployment_info.outputs.iam_role }}
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
+
   deploy_preview:
     needs:
       - deployment_info
