@@ -48,6 +48,7 @@ runs:
           echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/previews/${{ steps.deployment_info.outputs.short_sha }}"
         fi
     - name: Create Sentry Release
+      shell: bash
       run: echo ${{ inputs.is-preview }}
       # uses: getsentry/action-release@v1
       # env:
