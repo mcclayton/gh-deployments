@@ -48,8 +48,8 @@ runs:
           echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/previews/${{ steps.deployment_info.outputs.short_sha }}"
         fi
     - name: Create Sentry Release
-      uses: getsentry/action-release@v1
       if: "${{ inputs.is-preview }}" == 'false'
+      uses: getsentry/action-release@v1
       env:
         # TODO: Need to create a new one for github?
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
