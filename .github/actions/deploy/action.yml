@@ -9,6 +9,9 @@ inputs:
   iam-role:
     description: 'ARN of IAM Role to Assume'
     required: true
+  sentry-auth-token:
+    description: 'Sentry authentication token'
+    required: true
   is-preview:
     description: Boolean describing if this is a preview deployment
     required: false
@@ -51,8 +54,7 @@ runs:
       if: ${{ inputs.is-preview == 'false' }}
       uses: getsentry/action-release@v1
       env:
-        # TODO: Need to create a new one for github?
-        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_AUTH_TOKEN: ${{ inputs.sentry-auth-token }}
         SENTRY_ORG: cadence
         SENTRY_PROJECT: falcon
       with:
