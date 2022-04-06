@@ -71,6 +71,8 @@ jobs:
         with:
           bucket-name: ${{ needs.deployment_info.outputs.s3_bucket }}
           iam-role: ${{ needs.deployment_info.outputs.iam_role }}
+          # TODO: Need to create a new one for github?
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
   deploy_preview:
