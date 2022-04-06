@@ -50,7 +50,6 @@ runs:
         else
           echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/previews/${{ steps.deployment_info.outputs.short_sha }}"
         fi
-
     - name: Create Sentry Release
       if: ${{ inputs.is-preview == 'false' }}
       uses: getsentry/action-release@v1
@@ -64,7 +63,7 @@ runs:
         environment: ${{ env.REACT_APP_ENVIRONMENT }}
         version: ${{ env.REACT_APP_VERSION }}
     - name: Update Commit Status
-      if: ${{ success() }} && "${{ inputs.is-preview }}" == 'true'
+      if: ${{ success() }} && ${{ inputs.is-preview == 'true' }}
       shell: bash
       run: |
         curl \
