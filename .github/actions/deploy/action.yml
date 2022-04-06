@@ -63,7 +63,7 @@ runs:
         environment: ${{ env.REACT_APP_ENVIRONMENT }}
         version: ${{ env.REACT_APP_VERSION }}
     - name: Update Commit Status
-      if: ${{ success() }} && "${{ inputs.is-preview }}" == 'true'
+      if: ${{ success() }} && ${{ inputs.is-preview == 'true' }}
       shell: bash
       run: |
         curl \
