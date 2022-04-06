@@ -48,20 +48,18 @@ runs:
           echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/previews/${{ steps.deployment_info.outputs.short_sha }}"
         fi
     - name: Create Sentry Release
-      if: ${{ inputs.is-preview == false }}
-      shell: bash
-      run: echo ${{ inputs.is-preview }}
-      # uses: getsentry/action-release@v1
-      # env:
-      #   # TODO: Need to create a new one for github?
-      #   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      #   SENTRY_ORG: cadence
-      #   SENTRY_PROJECT: falcon
-      # with:
-      #   ignore_empty: true
-      #   sourcemaps: ./build
-      #   environment: ${{ env.REACT_APP_ENVIRONMENT }}
-      #   version: ${{ env.REACT_APP_VERSION }}
+      if: ${{ inputs.is-preview == 'false' }}
+      uses: getsentry/action-release@v1
+      env:
+        # TODO: Need to create a new one for github?
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_ORG: cadence
+        SENTRY_PROJECT: falcon
+      with:
+        ignore_empty: true
+        sourcemaps: ./build
+        environment: ${{ env.REACT_APP_ENVIRONMENT }}
+        version: ${{ env.REACT_APP_VERSION }}
     - name: Update Commit Status
       if: ${{ success() }} && "${{ inputs.is-preview }}" == 'true'
       shell: bash
