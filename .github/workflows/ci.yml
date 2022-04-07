@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           echo "TEST ENV VAR"
-          echo ${{ env.REACT_APP_WELCOME_MESSAGE }}
+          echo "${{ env.REACT_APP_WELCOME_MESSAGE }}"
         env:
           REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
       - name: Setup Workspace (From Cache)
