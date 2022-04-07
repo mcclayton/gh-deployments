@@ -15,6 +15,7 @@ runs:
         echo "TEST ENV VAR"
         echo "${{ env.REACT_APP_WELCOME_MESSAGE }}" | sed 's/./& /g'
     - name: Build
+      shell: bash
       run: npm run build --if-present
     - name: Persist Build Assets Artifact
       uses: actions/upload-artifact@v3
