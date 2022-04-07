@@ -27,6 +27,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: TEST ENV VAR
+        shell: bash
+        run: |
+          echo "TEST ENV VAR"
+          echo ${{ env.REACT_APP_WELCOME_MESSAGE }}
+        env:
+          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
       - name: Setup Workspace (From Cache)
         uses: ./.github/actions/setup-node-workspace
       - name: Build
@@ -73,8 +80,6 @@ jobs:
           iam-role: ${{ needs.deployment_info.outputs.iam_role }}
           # TODO: Need to create a new one for github?
           sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        env:
-          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
   deploy_preview:
     needs:
       - deployment_info
@@ -92,5 +97,3 @@ jobs:
           # TODO: Need to create a new one for github?
           sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
           is-preview: true
-        env:
-          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
