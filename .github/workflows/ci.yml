@@ -21,7 +21,12 @@ jobs:
       - name: Setup Workspace
         uses: ./.github/actions/setup-node-workspace
   build:
-    needs: setup_workspace
+    needs:
+      - setup_workspace
+      - deployment_info
+    environment:
+      name: ${{ needs.deployment_info.outputs.deployment_env }}
+      url: ${{ needs.deployment_info.outputs.deployment_url }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
