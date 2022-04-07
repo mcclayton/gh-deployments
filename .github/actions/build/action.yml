@@ -1,0 +1,25 @@
+name: Build Falcon
+description: Builds and publishes falcon assets in CI artifact
+runs-on: ubuntu-latest
+timeout-minutes: 15
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Setup Node Workspace
+      uses: ./.github/actions/setup-node-workspace
+    - name: TEST ENV VAR
+      shell: bash
+      run: |
+        echo "TEST ENV VAR"
+        echo "${{ env.REACT_APP_WELCOME_MESSAGE }}" | sed 's/./& /g'
+    - name: Build
+      shell: bash
+      run: npm run build --if-present
+    - name: Persist Build Assets Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifact
+        path: build
+        retention-days: 1
