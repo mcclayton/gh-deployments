@@ -9,6 +9,9 @@ inputs:
   iam-role:
     description: 'ARN of IAM Role to Assume'
     required: true
+  sentry-auth-token:
+    description: 'Sentry authentication token'
+    required: true
   is-preview:
     description: Boolean describing if this is a preview deployment
     required: false
@@ -47,9 +50,20 @@ runs:
         else
           echo "aws s3 sync ./build s3://${{ inputs.bucket-name }}/previews/${{ steps.deployment_info.outputs.short_sha }}"
         fi
-
+    # - name: Create Sentry Release
+    #   if: ${{ inputs.is-preview == 'false' }}
+    #   uses: getsentry/action-release@v1
+    #   env:
+    #     SENTRY_AUTH_TOKEN: ${{ inputs.sentry-auth-token }}
+    #     SENTRY_ORG: cadence
+    #     SENTRY_PROJECT: falcon
+    #   with:
+    #     ignore_empty: true
+    #     sourcemaps: ./build
+    #     environment: ${{ env.REACT_APP_ENVIRONMENT }}
+    #     version: ${{ env.REACT_APP_VERSION }}
     - name: Update Commit Status
-      if: ${{ success() }} && "${{ inputs.is-preview }}" == 'true'
+      if: ${{ success() && inputs.is-preview == 'true' }}
       shell: bash
       run: |
         curl \
@@ -58,5 +72,3 @@ runs:
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/mcclayton/gh-deployments/statuses/${{ steps.deployment_info.outputs.full_sha }} \
           -d "{\"state\":\"success\", \"context\": \"Preview Environment\", \"target_url\": \"https://${{ steps.deployment_info.outputs.short_sha }}.preview.my.cadence.care\", \"description\": \"View details for preview environment\"}"
-
-

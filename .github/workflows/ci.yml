@@ -12,37 +12,8 @@ on:
       - main
       - develop
 jobs:
-  setup_workspace:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Workspace
-        uses: ./.github/actions/setup-node-workspace
-  build:
-    needs: setup_workspace
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Workspace (From Cache)
-        uses: ./.github/actions/setup-node-workspace
-      - name: Build
-        run: npm run build --if-present
-        env:
-          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
-      - name: Persist Build Assets Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifact
-          path: build
-          retention-days: 1
   deployment_info:
-    needs: setup_workspace
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     outputs:
       deployment_env: ${{ steps.deployment_info.outputs.deployment_env }}
       deployment_url: ${{ steps.deployment_info.outputs.deployment_url }}
@@ -54,11 +25,36 @@ jobs:
       - name: Extract Deployment Info
         id: deployment_info
         uses: ./.github/actions/deployment_info
+  build_for_preview:
+    needs: deployment_info
+    if: ${{ needs.deployment_info.outputs.deployment_env == 'preview' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build For Environment
+        uses: ./.github/actions/build
+        env:
+          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
+  build_for_env:
+    needs: deployment_info
+    if: ${{ contains(fromJson('["development", "qa", "production"]'), needs.deployment_info.outputs.deployment_env) }}
+    environment:
+      name: ${{ needs.deployment_info.outputs.deployment_env }}
+      url: ${{ needs.deployment_info.outputs.deployment_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build For Environment
+        uses: ./.github/actions/build
+        env:
+          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
   deploy:
     needs:
       - deployment_info
-      - build
-    if: ${{ needs.deployment_info.outputs.deployment_env == 'development' || needs.deployment_info.outputs.deployment_env == 'qa' || needs.deployment_info.outputs.deployment_env == 'production' }}
+      - build_for_env
+    if: ${{ contains(fromJson('["development", "qa", "production"]'), needs.deployment_info.outputs.deployment_env) }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ needs.deployment_info.outputs.deployment_env }}
@@ -71,13 +67,12 @@ jobs:
         with:
           bucket-name: ${{ needs.deployment_info.outputs.s3_bucket }}
           iam-role: ${{ needs.deployment_info.outputs.iam_role }}
-        env:
-          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
-
+          # TODO: Need to create a new one for github?
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
   deploy_preview:
     needs:
       - deployment_info
-      - build
+      - build_for_preview
     if: ${{ needs.deployment_info.outputs.deployment_env == 'preview' }}
     runs-on: ubuntu-latest
     steps:
@@ -88,6 +83,6 @@ jobs:
         with:
           bucket-name: ${{ needs.deployment_info.outputs.s3_bucket }}
           iam-role: ${{ needs.deployment_info.outputs.iam_role }}
+          # TODO: Need to create a new one for github?
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
           is-preview: true
-        env:
-          REACT_APP_WELCOME_MESSAGE: ${{ secrets.REACT_APP_WELCOME_MESSAGE }}
