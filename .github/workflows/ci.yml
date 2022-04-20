@@ -12,6 +12,14 @@ on:
       - main
       - develop
 jobs:
+  test_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Extract Deployment Info
+        shell: bash
+        run: echo "Hello World"
   deployment_info:
     runs-on: ubuntu-latest
     outputs:
