@@ -71,3 +71,5 @@ runs:
           -f context="Preview Environment" \
           -f description="View details for preview environment" \
           -f target_url="https://${{ steps.deployment_info.outputs.short_sha }}.preview.my.cadence.care"
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
