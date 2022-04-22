@@ -17,9 +17,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Extract Deployment Info
+      - name: Print PR Number
         shell: bash
-        run: echo "Hello World"
+        run: |
+          echo "PR NUMBER: "
+          echo "github.event.number ${{ github.event.number }}"
+          echo "github.event.issue.number ${{ github.event.issue.number }}"
   deployment_info:
     runs-on: ubuntu-latest
     outputs:
