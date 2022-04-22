@@ -12,20 +12,6 @@ on:
       - main
       - develop
 jobs:
-  test_job:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Print PR Number
-        shell: bash
-        run: |
-          echo "PR NUMBER: "
-          echo "github.event.number ${{ github.event.number }}"
-          echo "github.event.issue.number ${{ github.event.issue.number }}"
-          gh pr comment ${{ github.event.number }} -R mcclayton/gh-deployments --body "**Hello** *World*"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
   deployment_info:
     runs-on: ubuntu-latest
     outputs:
