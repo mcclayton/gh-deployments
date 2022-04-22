@@ -24,6 +24,11 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Print PR Number
+      shell: bash
+      run: |
+        echo "PR NUMBER: "
+        echo ${{github.event.issue.number}
     - name: Extract Deployment Info
       id: deployment_info
       uses: ./.github/actions/deployment_info
