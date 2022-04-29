@@ -72,6 +72,6 @@ runs:
           -f description="View details for preview environment" \
           -f target_url="https://${{ steps.deployment_info.outputs.short_sha }}.preview.my.cadence.care"
 
-        gh pr comment ${{ github.event.number }} -R mcclayton/gh-deployments --body ":rocket: **Preview Environment:** [${{ steps.deployment_info.outputs.short_sha }}](https://${{ steps.deployment_info.outputs.short_sha }}.preview.my.cadence.care)"
+        gh pr comment ${{ github.event.number }} --body ":rocket: **Preview Environment Ready:** [${{ steps.deployment_info.outputs.short_sha }}](https://${{ steps.deployment_info.outputs.short_sha }}.preview.my.cadence.care)"
       env:
         GITHUB_TOKEN: ${{ github.token }}
